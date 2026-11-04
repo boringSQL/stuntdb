@@ -1,0 +1,18 @@
+# build output
+/stuntdb
+/dist/
+
+# test and coverage
+*.test
+*.out
+coverage.*
+
+# editor and os
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# local env
+.env
+.env.local
