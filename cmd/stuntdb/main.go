@@ -1,13 +1,7 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
+import "os"
 
 func main() {
-	if err := Run(); err != nil {
-		fmt.Fprintln(os.Stderr, "Error:", err)
-		os.Exit(1)
-	}
+	os.Exit(Run())
 }
