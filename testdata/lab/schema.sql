@@ -1,0 +1,12 @@
+create table tenants(id int primary key, name text not null, plan text not null);
+create table customers(id bigint primary key, tenant_id int not null references tenants, email text not null, created_at timestamptz not null);
+create index customers_tenant_idx on customers(tenant_id);
+create index customers_email_idx on customers(email);
+create table coupons(code text primary key, discount int not null);
+create table orders(id bigint primary key, tenant_id int not null, customer_id bigint not null references customers, status text not null, total numeric(12,2) not null, created_at timestamptz not null, coupon_code text);
+create index orders_customer_idx on orders(customer_id);
+create index orders_tenant_created_idx on orders(tenant_id, created_at);
+create index orders_status_idx on orders(status);
+create table order_items(order_id bigint not null references orders, sku text not null, qty int not null, price numeric(10,2) not null);
+create index order_items_order_idx on order_items(order_id);
+create index order_items_sku_idx on order_items(sku);
