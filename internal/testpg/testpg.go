@@ -1,4 +1,3 @@
-// Package testpg gives a live test a PostgreSQL server to work against.
 package testpg
 
 import (
@@ -16,7 +15,6 @@ import (
 
 const envURI = "STUNTDB_TEST_PGURI"
 
-// Admin skips the test when no server is configured and returns its URI.
 func Admin(t testing.TB) string {
 	t.Helper()
 	uri := os.Getenv(envURI)
@@ -26,7 +24,6 @@ func Admin(t testing.TB) string {
 	return uri
 }
 
-// Open connects to uri and closes the connection when the test ends.
 func Open(t testing.TB, uri string) *sql.DB {
 	t.Helper()
 	db, err := sql.Open("pgx", uri)
@@ -43,8 +40,6 @@ func Open(t testing.TB, uri string) *sql.DB {
 	return db
 }
 
-// Create makes a scratch database and returns its URI. The database is dropped
-// when the test ends, whether it passed or not.
 func Create(t testing.TB) string {
 	t.Helper()
 	admin := Admin(t)
@@ -61,7 +56,6 @@ func Create(t testing.TB) string {
 	return databaseURI(t, admin, name)
 }
 
-// Major returns the server's major version: 18 for 18.7.
 func Major(t testing.TB) int {
 	t.Helper()
 	var num int

@@ -20,8 +20,7 @@ docker run -d --name "$container" -e POSTGRES_PASSWORD=lab -p "$port:5432" "$ima
 
 ready() { docker exec "$container" psql -U postgres -qc 'select 1' >/dev/null 2>&1; }
 
-# the image starts a temporary server to initialize the cluster, then restarts;
-# wait for the second one
+# the image restarts its server after initdb
 for i in $(seq 1 60); do ready && break; sleep 1; done
 sleep 1
 for i in $(seq 1 30); do ready && break; sleep 1; done

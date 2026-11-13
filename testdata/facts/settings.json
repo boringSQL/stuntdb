@@ -1,0 +1,5 @@
+{
+  "effective_cache_size": "4GB",
+  "random_page_cost": "1.1",
+  "work_mem": "4MB"
+}

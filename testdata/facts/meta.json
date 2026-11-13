@@ -1,0 +1,11 @@
+{
+  "format": 1,
+  "server": "18.1",
+  "major": 18,
+  "captured": "2026-11-22T09:00:00Z",
+  "hash": "sha256:768ec7d59bab474d2273c3720d14a8ddbd7b2f5e453808342e53438ca973a6a1",
+  "masked": "no",
+  "producer": "stuntdb test fixture",
+  "pg_dump": "18.6",
+  "omitted": []
+}
