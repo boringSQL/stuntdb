@@ -126,6 +126,9 @@ func (f *Facts) Validate() error {
 	if len(f.Settings) == 0 {
 		return fmt.Errorf("%s: %s is empty", f.Dir, SettingsFile)
 	}
+	if _, err := LoadSettings(f.Settings); err != nil {
+		return fmt.Errorf("%s: %s: %w", f.Dir, SettingsFile, err)
+	}
 	if f.Meta.Hash != f.Hash() {
 		return fmt.Errorf("%s: hash does not match the files, capture again", f.Dir)
 	}
