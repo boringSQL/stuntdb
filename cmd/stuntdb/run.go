@@ -22,7 +22,7 @@ type command func(args []string, stdout, stderr io.Writer) int
 
 var commands = map[string]command{
 	"version": runVersion,
-	"facts":   notImplemented,
+	"facts":   runFacts,
 	"up":      notImplemented,
 }
 

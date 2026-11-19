@@ -17,7 +17,7 @@ func TestRun(t *testing.T) {
 		{name: "version", args: []string{"version"}, code: exitOK, out: "stuntdb "},
 		{name: "no arguments", code: exitTrouble, err: "usage: stuntdb"},
 		{name: "unknown command", args: []string{"nope"}, code: exitTrouble, err: "usage: stuntdb"},
-		{name: "facts not implemented", args: []string{"facts", "prod.facts"}, code: exitTrouble, err: "stuntdb: facts: not implemented"},
+		{name: "facts without arguments", args: []string{"facts"}, code: exitTrouble, err: "stuntdb: usage: stuntdb facts"},
 		{name: "up not implemented", args: []string{"up", "prod.facts"}, code: exitTrouble, err: "stuntdb: up: not implemented"},
 	}
 

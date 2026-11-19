@@ -22,7 +22,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        postgres: ["16", "17", "18", "19"]
+        include:
+          - server: "16"
+            client: "18"
+          - server: "17"
+            client: "18"
+          - server: "18"
+            client: "18"
+          - server: "19"
+            client: "19"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -32,10 +40,21 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: client tools
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+            https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18 postgresql-client-19
+          echo "/usr/lib/postgresql/${{ matrix.client }}/bin" >> "$GITHUB_PATH"
       - name: start a server
         run: |
           docker build -q -t stuntdb-lab -f testdata/lab/Dockerfile \
-            --build-arg PG_MAJOR=${{ matrix.postgres }} regresql/
+            --build-arg PG_MAJOR=${{ matrix.server }} regresql/
           docker run -d --name lab -e POSTGRES_PASSWORD=lab -p 5432:5432 stuntdb-lab
           for i in $(seq 1 60); do
             docker exec lab psql -U postgres -qc 'select 1' >/dev/null 2>&1 && break
