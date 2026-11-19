@@ -2,7 +2,10 @@ module github.com/boringsql/stuntdb
 
 go 1.27
 
-require github.com/jackc/pgx/v5 v5.8.0
+require (
+	github.com/boringsql/queries v1.6.5
+	github.com/jackc/pgx/v5 v5.8.0
+)
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect

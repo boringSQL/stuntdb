@@ -16,28 +16,10 @@ type Counts struct {
 	Relations int
 }
 
-const countsQuery = `
-select
-  (select count(*)
-     from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where c.relkind in ('r', 'p', 'm') and n.nspname not in ('pg_catalog', 'information_schema')
-      and n.nspname !~ '^pg_'),
-  (select count(*)
-     from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where c.relkind = 'i' and n.nspname not in ('pg_catalog', 'information_schema')
-      and n.nspname !~ '^pg_'),
-  (select count(*)
-     from pg_attribute a
-     join pg_class c on c.oid = a.attrelid
-     join pg_namespace n on n.oid = c.relnamespace
-    where c.relkind in ('r', 'p', 'm') and a.attnum > 0 and not a.attisdropped
-      and n.nspname not in ('pg_catalog', 'information_schema') and n.nspname !~ '^pg_')`
-
 func NewMeta(db *sql.DB, producer, pgDump string) (Meta, error) {
 	var server string
 	var num int
-	err := db.QueryRow("select current_setting('server_version'), current_setting('server_version_num')::int").
-		Scan(&server, &num)
+	err := db.QueryRow(query("server-version")).Scan(&server, &num)
 	if err != nil {
 		return Meta{}, fmt.Errorf("reading server version: %w", err)
 	}
@@ -56,7 +38,7 @@ func NewMeta(db *sql.DB, producer, pgDump string) (Meta, error) {
 
 func CaptureCounts(db *sql.DB) (Counts, error) {
 	var counts Counts
-	err := db.QueryRow(countsQuery).
+	err := db.QueryRow(query("catalog-counts")).
 		Scan(&counts.Tables, &counts.Indexes, &counts.Columns)
 	if err != nil {
 		return Counts{}, fmt.Errorf("counting catalog objects: %w", err)

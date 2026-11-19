@@ -75,15 +75,8 @@ var extraSettings = []string{
 	"max_parallel_workers_per_gather",
 }
 
-const settingsQuery = `
-select name, setting
-from pg_settings
-where context = 'user'
-  and (category like 'Query Tuning%' or name = any($1))
-order by name`
-
 func CaptureSettings(db *sql.DB) (map[string]string, error) {
-	rows, err := db.Query(settingsQuery, extraSettings)
+	rows, err := db.Query(query("planner-settings"), extraSettings)
 	if err != nil {
 		return nil, fmt.Errorf("reading settings: %w", err)
 	}
