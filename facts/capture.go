@@ -1,6 +1,7 @@
 package facts
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -57,11 +58,29 @@ func Capture(ctx context.Context, source, dir, producer string) (*Facts, Counts,
 		return nil, Counts{}, err
 	}
 
-	captured := &Facts{Meta: meta, Stats: stats, Settings: settingsJSON, Schema: schema}
+	captured := &Facts{
+		Meta:     meta,
+		Stats:    normaliseRestrict(stats),
+		Settings: settingsJSON,
+		Schema:   normaliseRestrict(schema),
+	}
 	if err := Write(dir, captured); err != nil {
 		return nil, Counts{}, err
 	}
 	return captured, counts, nil
+}
+
+func normaliseRestrict(dump []byte) []byte {
+	lines := bytes.Split(dump, []byte("\n"))
+	for i, line := range lines {
+		switch {
+		case bytes.HasPrefix(line, []byte(`\restrict `)):
+			lines[i] = []byte(`\restrict stuntdb`)
+		case bytes.HasPrefix(line, []byte(`\unrestrict `)):
+			lines[i] = []byte(`\unrestrict stuntdb`)
+		}
+	}
+	return bytes.Join(lines, []byte("\n"))
 }
 
 func openReadOnly(ctx context.Context, uri string) (*sql.DB, error) {

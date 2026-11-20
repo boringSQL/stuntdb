@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "server": "18.7",
+  "major": 18,
+  "captured": "2026-11-22T21:26:10Z",
+  "hash": "sha256:7106ec77e5e8993ad8074817f5882f4eda0b2cc1c1d7706e276fca21251646fd",
+  "masked": "no",
+  "producer": "stuntdb dev",
+  "pg_dump": "18.6",
+  "omitted": [
+    "extended statistics: definitions only, pg_dump 18 carries no data for them"
+  ]
+}
