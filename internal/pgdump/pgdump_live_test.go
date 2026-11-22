@@ -69,6 +69,20 @@ func TestDump(t *testing.T) {
 	}
 }
 
+func TestOlderClientRefusesNewerServer(t *testing.T) {
+	tool, err := pgdump.Find()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tool.Version.Major >= 19 {
+		t.Skipf("client %s can dump a 19 server", tool.Version)
+	}
+	err = tool.Check("19.1")
+	if err == nil || !strings.Contains(err.Error(), "cannot dump a 19.1 server") {
+		t.Errorf("check = %v", err)
+	}
+}
+
 func statisticsCalls(t *testing.T, stats []byte) int {
 	t.Helper()
 	text := string(stats)
