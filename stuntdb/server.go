@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ const envServer = "STUNTDB_SERVER"
 
 type Server struct {
 	db    *sql.DB
+	url   *url.URL
 	label string
 }
 
@@ -32,6 +34,13 @@ func Resolve(flag string) (string, error) {
 }
 
 func Open(ctx context.Context, uri string) (*Server, error) {
+	parsed, err := url.Parse(uri)
+	if err != nil {
+		return nil, fmt.Errorf("server %q: %w", uri, err)
+	}
+	if parsed.Scheme == "" {
+		return nil, fmt.Errorf("server %q is not a uri", uri)
+	}
 	cfg, err := pgconn.ParseConfig(uri)
 	if err != nil {
 		return nil, fmt.Errorf("server: %w", err)
@@ -55,7 +64,7 @@ func Open(ctx context.Context, uri string) (*Server, error) {
 		db.Close()
 		return nil, fmt.Errorf("%s is not a superuser on %s", user, label)
 	}
-	return &Server{db: db, label: label}, nil
+	return &Server{db: db, url: parsed, label: label}, nil
 }
 
 func (s *Server) Close() error {

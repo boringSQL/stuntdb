@@ -1,6 +1,7 @@
 package stuntdb
 
 import (
+	"context"
 	"encoding/hex"
 	"strings"
 	"testing"
@@ -46,5 +47,12 @@ func TestRandomName(t *testing.T) {
 		if _, err := hex.DecodeString(name[len(namePrefix):]); err != nil {
 			t.Fatalf("name = %q: %v", name, err)
 		}
+	}
+}
+
+func TestOpenRejectsDSN(t *testing.T) {
+	_, err := Open(context.Background(), "host=localhost dbname=shop")
+	if err == nil || !strings.Contains(err.Error(), "not a uri") {
+		t.Errorf("error = %v", err)
 	}
 }

@@ -2,15 +2,12 @@ package pgdump_test
 
 import (
 	"context"
-	"database/sql"
-	"net/url"
 	"strings"
 	"testing"
 
 	"github.com/boringsql/stuntdb/internal/pgdump"
+	"github.com/boringsql/stuntdb/internal/psql"
 	"github.com/boringsql/stuntdb/internal/testpg"
-
-	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 func TestDump(t *testing.T) {
@@ -56,12 +53,16 @@ func TestDump(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	other := simpleDB(t, testpg.Create(t))
-	if _, err := other.Exec(stripMetaCommands(string(schema))); err != nil {
+	loader, err := psql.Find()
+	if err != nil {
+		t.Fatal(err)
+	}
+	other := testpg.Create(t)
+	if err := loader.Load(ctx, other, schema, testpg.Major(t)); err != nil {
 		t.Fatalf("loading schema.sql: %v", err)
 	}
 	var tables int
-	if err := other.QueryRow("select count(*) from pg_tables where schemaname = 'public'").Scan(&tables); err != nil {
+	if err := testpg.Open(t, other).QueryRow("select count(*) from pg_tables where schemaname = 'public'").Scan(&tables); err != nil {
 		t.Fatal(err)
 	}
 	if tables != 3 {
@@ -112,36 +113,4 @@ func statisticsCalls(t *testing.T, stats []byte) int {
 		t.Errorf("the last call is unfinished")
 	}
 	return calls
-}
-
-func stripMetaCommands(sql string) string {
-	var b strings.Builder
-	for _, line := range strings.Split(sql, "\n") {
-		if strings.HasPrefix(line, "\\") {
-			continue
-		}
-		b.WriteString(line)
-		b.WriteString("\n")
-	}
-	return b.String()
-}
-
-func simpleDB(t *testing.T, uri string) *sql.DB {
-	t.Helper()
-	u, err := url.Parse(uri)
-	if err != nil {
-		t.Fatal(err)
-	}
-	query := u.Query()
-	query.Set("default_query_exec_mode", "simple_protocol")
-	u.RawQuery = query.Encode()
-	db, err := sql.Open("pgx", u.String())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := db.Ping(); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { db.Close() })
-	return db
 }

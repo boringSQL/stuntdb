@@ -5,29 +5,19 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"regexp"
-	"strconv"
 	"strings"
+
+	"github.com/boringsql/stuntdb/internal/pgver"
 )
 
 const minimum = "18.6"
 
-var (
-	versionPattern = regexp.MustCompile(`(\d+)\.(\d+)`)
-	oldest         = Version{Major: 18, Minor: 6}
-)
+var oldest = pgver.Version{Major: 18, Minor: 6}
 
-type (
-	Tool struct {
-		Path    string
-		Version Version
-	}
-
-	Version struct {
-		Major int
-		Minor int
-	}
-)
+type Tool struct {
+	Path    string
+	Version pgver.Version
+}
 
 func Find() (*Tool, error) {
 	path, err := exec.LookPath("pg_dump")
@@ -38,7 +28,7 @@ func Find() (*Tool, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s --version: %w", path, err)
 	}
-	version, err := ParseVersion(string(out))
+	version, err := pgver.Parse(string(out))
 	if err != nil {
 		return nil, fmt.Errorf("%s --version: %w", path, err)
 	}
@@ -54,10 +44,10 @@ func (t *Tool) Schema(ctx context.Context, uri string) ([]byte, error) {
 }
 
 func (t *Tool) Check(source string) error {
-	if t.Version.less(oldest) {
+	if t.Version.Less(oldest) {
 		return fmt.Errorf("pg_dump %s is too old: statistics need %s or later", t.Version, minimum)
 	}
-	server, err := ParseVersion(source)
+	server, err := pgver.Parse(source)
 	if err != nil {
 		return fmt.Errorf("server version %q: %w", source, err)
 	}
@@ -65,33 +55,6 @@ func (t *Tool) Check(source string) error {
 		return fmt.Errorf("pg_dump %s cannot dump a %s server", t.Version, source)
 	}
 	return nil
-}
-
-func (v Version) String() string {
-	return strconv.Itoa(v.Major) + "." + strconv.Itoa(v.Minor)
-}
-
-func (v Version) less(other Version) bool {
-	if v.Major != other.Major {
-		return v.Major < other.Major
-	}
-	return v.Minor < other.Minor
-}
-
-func ParseVersion(text string) (Version, error) {
-	match := versionPattern.FindStringSubmatch(text)
-	if match == nil {
-		return Version{}, fmt.Errorf("no version in %q", strings.TrimSpace(text))
-	}
-	major, err := strconv.Atoi(match[1])
-	if err != nil {
-		return Version{}, err
-	}
-	minor, err := strconv.Atoi(match[2])
-	if err != nil {
-		return Version{}, err
-	}
-	return Version{Major: major, Minor: minor}, nil
 }
 
 func (t *Tool) dump(ctx context.Context, uri string, args ...string) ([]byte, error) {

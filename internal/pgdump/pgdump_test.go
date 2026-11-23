@@ -5,38 +5,8 @@ import (
 	"testing"
 
 	"github.com/boringsql/stuntdb/internal/pgdump"
+	"github.com/boringsql/stuntdb/internal/pgver"
 )
-
-func TestParseVersion(t *testing.T) {
-	tests := []struct {
-		name string
-		text string
-		want string
-		err  string
-	}{
-		{name: "plain", text: "18.6", want: "18.6"},
-		{name: "pg_dump output", text: "pg_dump (PostgreSQL) 18.6 (Homebrew)", want: "18.6"},
-		{name: "trailing newline", text: "18.6\n", want: "18.6"},
-		{name: "no version", text: "pg_dump (PostgreSQL)", err: "no version"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			version, err := pgdump.ParseVersion(tt.text)
-			if tt.err != "" {
-				if err == nil || !strings.Contains(err.Error(), tt.err) {
-					t.Errorf("error = %v, want %q", err, tt.err)
-				}
-				return
-			}
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got := version.String(); got != tt.want {
-				t.Errorf("version = %s, want %s", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestCheck(t *testing.T) {
 	tests := []struct {
@@ -54,7 +24,7 @@ func TestCheck(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			version, err := pgdump.ParseVersion(tt.tool)
+			version, err := pgver.Parse(tt.tool)
 			if err != nil {
 				t.Fatal(err)
 			}
