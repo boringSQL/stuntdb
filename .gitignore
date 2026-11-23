@@ -1,5 +1,4 @@
 # build output
-/stuntdb
 /dist/
 
 # test and coverage
