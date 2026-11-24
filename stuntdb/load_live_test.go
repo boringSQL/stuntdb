@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 
@@ -45,12 +44,8 @@ func TestLoad(t *testing.T) {
 }
 
 func TestLoadLabSchema(t *testing.T) {
-	schema, err := os.ReadFile("../testdata/lab/facts/schema.sql")
-	if err != nil {
-		t.Fatal(err)
-	}
 	db := created(t, open(t))
-	if err := db.Load(context.Background(), schema); err != nil {
+	if err := db.Load(context.Background(), labSchema(t)); err != nil {
 		t.Fatal(err)
 	}
 
