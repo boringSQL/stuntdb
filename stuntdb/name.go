@@ -2,8 +2,6 @@ package stuntdb
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 )
 
@@ -19,7 +17,7 @@ func (s *Server) Name(ctx context.Context) (string, error) {
 			return "", err
 		}
 		var taken bool
-		if err := s.db.QueryRowContext(ctx, query("database-exists"), name).Scan(&taken); err != nil {
+		if err := s.db.QueryRowContext(ctx, query("name-taken"), name).Scan(&taken); err != nil {
 			return "", fmt.Errorf("checking %s: %w", name, err)
 		}
 		if !taken {
@@ -30,9 +28,9 @@ func (s *Server) Name(ctx context.Context) (string, error) {
 }
 
 func randomName() (string, error) {
-	var b [2]byte
-	if _, err := rand.Read(b[:]); err != nil {
+	suffix, err := randomHex(2)
+	if err != nil {
 		return "", fmt.Errorf("generating a name: %w", err)
 	}
-	return namePrefix + hex.EncodeToString(b[:]), nil
+	return namePrefix + suffix, nil
 }
