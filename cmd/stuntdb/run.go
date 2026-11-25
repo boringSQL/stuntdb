@@ -23,7 +23,7 @@ type command func(args []string, stdout, stderr io.Writer) int
 var commands = map[string]command{
 	"version": runVersion,
 	"facts":   runFacts,
-	"up":      notImplemented,
+	"up":      runUp,
 }
 
 func Run() int {
@@ -46,10 +46,6 @@ func run(args []string, stdout, stderr io.Writer) int {
 func runVersion(_ []string, stdout, _ io.Writer) int {
 	fmt.Fprintln(stdout, build())
 	return exitOK
-}
-
-func notImplemented(args []string, _ io.Writer, stderr io.Writer) int {
-	return fail(stderr, args[0]+": not implemented yet")
 }
 
 func fail(stderr io.Writer, msg string) int {

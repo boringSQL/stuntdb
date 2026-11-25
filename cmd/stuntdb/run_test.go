@@ -18,7 +18,7 @@ func TestRun(t *testing.T) {
 		{name: "no arguments", code: exitTrouble, err: "usage: stuntdb"},
 		{name: "unknown command", args: []string{"nope"}, code: exitTrouble, err: "usage: stuntdb"},
 		{name: "facts without arguments", args: []string{"facts"}, code: exitTrouble, err: "stuntdb: usage: stuntdb facts"},
-		{name: "up not implemented", args: []string{"up", "prod.facts"}, code: exitTrouble, err: "stuntdb: up: not implemented"},
+		{name: "up without arguments", args: []string{"up"}, code: exitTrouble, err: "stuntdb: usage: stuntdb up"},
 	}
 
 	for _, tt := range tests {
